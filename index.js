@@ -72,6 +72,44 @@ app.delete("/delete/:key", async (req, res) => {
     }
 });
 
+// Endpoint para agregar campos en un hash
+app.post('/hash', async (req, res) => {
+    const {key, field, value} = req.body;
+
+    try {
+        await client.hSet(key, field, value);
+        res.send(`Campo "${field}" con el valor "${value}" añadido al hash: "${key}".`);
+    } catch (err){
+        res.status(400).send(`Error al agregar el campo: ${err.message}`);
+    }
+})
+
+// Endpoint para leer campos en un hash
+app.get('/hash/:key/:field', async (req, res) => {
+    const {key, field} = req.params;
+
+    try{
+        const value = await client.hGet(key, field);
+        res.send(`Valor del campo "${field}" en el hash "${key}": ${value}`);
+    } catch (err) {
+        res.status(400).send(`Error al obtener el campo: ${err.message}`);
+    }
+});
+
+// Endpoint para eliminar campos en un hash
+app.delete("/hash/:key/:field", async (req, res) => {
+    const { key, field } = req.params;
+
+    try {
+        const result = await client.hDel(key, field);
+        res.send(
+            result ==1 ? `campo "${field}" eliminado.` : `campo "${field}" no encontrado.`
+        );
+    } catch (err) {
+        res.status(400).send(`Error al eliminar el campo: : ${err.message}`);
+    }
+})
+
 app.listen(
     PORT, () => {console.log(`Escuchando en el puerto ${PORT}`)}
 )
